@@ -129,18 +129,45 @@ An example ingress (AWS ALB) is provided at `k8s/base/ingresses.yaml.example`. C
 
 ### Kustomize Overlays
 
-For org-specific configuration (SSO, real hostnames, registry URLs), create an overlay:
+For org-specific configuration (SSO, real hostnames, registry URLs), create an overlay in a separate repo or directory:
 
 ```
-k8s/
-├── base/                    # Generic manifests (this repo)
-└── overlays/
-    └── your-org/            # Your private overlay
-        ├── kustomization.yaml
-        ├── ingresses.yaml   # Real hostnames
-        └── patches/
-            └── grafana-sso.yaml  # Azure AD OAuth patch
+your-deploy-repo/
+└── k8s/
+    ├── kustomization.yaml       # References base resources + dashboard configMapGenerator
+    ├── ingresses.yaml           # Real hostnames
+    └── patches/
+        ├── grafana-sso.yaml     # OAuth env vars
+        ├── images.yaml          # Registry URL overrides
+        └── pvcs.yaml            # Storage class override
 ```
+
+> **Note:** The base's `configMapGenerator` references `../../dashboards/*.json`, which works when running `kubectl apply -k k8s/base/` directly but triggers a Kustomize security error when consumed as a sub-resource from another directory. To work around this, overlays should reference the base's individual resource files and provide their own `configMapGenerator` for the dashboard JSON:
+>
+> ```yaml
+> # overlay kustomization.yaml
+> resources:
+>   - path/to/claudefana-enterprise/k8s/base/namespace.yaml
+>   - path/to/claudefana-enterprise/k8s/base/configmaps.yaml
+>   - path/to/claudefana-enterprise/k8s/base/deployments.yaml
+>   - path/to/claudefana-enterprise/k8s/base/services.yaml
+>   - path/to/claudefana-enterprise/k8s/base/pvcs.yaml
+>   - ingresses.yaml
+>
+> configMapGenerator:
+>   - name: grafana-dashboard-json
+>     files:
+>       - path/to/claudefana-enterprise/dashboards/claude-code-dashboard.json
+>       - path/to/claudefana-enterprise/dashboards/claude-code-user-explorer.json
+>
+> patches:
+>   - path: patches/grafana-sso.yaml
+> ```
+>
+> Cross-directory references also require `--load-restrictor=LoadRestrictionsNone`:
+> ```bash
+> kubectl kustomize k8s/ --load-restrictor=LoadRestrictionsNone | kubectl apply -f -
+> ```
 
 ## How It Works
 
