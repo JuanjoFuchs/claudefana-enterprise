@@ -1,0 +1,336 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: claudefana
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    connectors:
+      # Count connector - creates counter metrics from logs
+      count:
+        logs:
+          claude_code_api_requests_total:
+            description: "Total Claude Code API requests"
+            conditions:
+              - 'attributes["event.name"] == "api_request"'
+            attributes:
+              - key: model
+              - key: session.id
+              - key: user.email
+
+          claude_code_tool_calls_total:
+            description: "Total tool invocations"
+            conditions:
+              - 'attributes["event.name"] == "tool_result"'
+            attributes:
+              - key: tool_name
+              - key: session.id
+
+          claude_code_user_prompts_total:
+            description: "Total user prompts submitted"
+            conditions:
+              - 'attributes["event.name"] == "user_prompt"'
+            attributes:
+              - key: session.id
+
+      # Signal-to-metrics connector - extracts numeric values from log attributes
+      # Note: Claude Code exports values as strings, so we use Double() to parse them
+      signaltometrics:
+        logs:
+          - name: claude_code_cost_usd_total
+            description: "Total cost in USD"
+            sum:
+              value: Double(attributes["cost_usd"])
+            attributes:
+              - key: model
+              - key: user.email
+            conditions:
+              - 'attributes["event.name"] == "api_request"'
+
+          - name: claude_code_input_tokens_total
+            description: "Total input tokens"
+            sum:
+              value: Double(attributes["input_tokens"])
+            attributes:
+              - key: model
+            conditions:
+              - 'attributes["event.name"] == "api_request"'
+
+          - name: claude_code_output_tokens_total
+            description: "Total output tokens"
+            sum:
+              value: Double(attributes["output_tokens"])
+            attributes:
+              - key: model
+            conditions:
+              - 'attributes["event.name"] == "api_request"'
+
+          - name: claude_code_cache_read_tokens_total
+            description: "Total cache read tokens"
+            sum:
+              value: Double(attributes["cache_read_tokens"])
+            attributes:
+              - key: model
+            conditions:
+              - 'attributes["event.name"] == "api_request"'
+
+          - name: claude_code_cache_creation_tokens_total
+            description: "Total cache creation tokens"
+            sum:
+              value: Double(attributes["cache_creation_tokens"])
+            attributes:
+              - key: model
+            conditions:
+              - 'attributes["event.name"] == "api_request"'
+
+          - name: claude_code_request_duration_ms
+            description: "Request duration in milliseconds"
+            gauge:
+              value: Double(attributes["duration_ms"])
+            attributes:
+              - key: model
+            conditions:
+              - 'attributes["event.name"] == "api_request"'
+
+    processors:
+      batch:
+        timeout: 5s
+        send_batch_size: 100
+
+      resource:
+        attributes:
+          - key: service.name
+            value: "claude-code"
+            action: upsert
+
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
+        spike_limit_mib: 128
+
+      deltatocumulative:
+        max_stale: 10m
+        max_streams: 10000
+
+    exporters:
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+        namespace: ""
+        send_timestamps: true
+        metric_expiration: 5m
+        enable_open_metrics: true
+        resource_to_telemetry_conversion:
+          enabled: true
+
+      otlphttp/loki:
+        endpoint: http://loki:3100/otlp
+
+      debug:
+        verbosity: detailed
+
+    service:
+      telemetry:
+        logs:
+          level: info
+
+      pipelines:
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [otlphttp/loki, count, signaltometrics, debug]
+
+        metrics:
+          receivers: [otlp, count, signaltometrics]
+          processors: [deltatocumulative, batch]
+          exporters: [prometheus, debug]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: claudefana
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    rule_files:
+      - /etc/prometheus/alerts/*.yml
+
+    scrape_configs:
+      - job_name: 'otel-collector'
+        static_configs:
+          - targets: ['otel-collector:8889']
+        scrape_interval: 5s
+
+      - job_name: 'jira-tempo'
+        static_configs:
+          - targets: ['jira-tempo-exporter:9102']
+        scrape_interval: 60s
+
+      - job_name: 'graph-enrichment'
+        static_configs:
+          - targets: ['graph-enrichment:9101']
+        scrape_interval: 60s
+
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-alerts
+  namespace: claudefana
+data:
+  prometheus-alerts.yml: |
+    groups:
+      - name: claude_code_usage_alerts
+        rules:
+          - alert: ClaudeCodeUsage5hWarning
+            expr: claude_code_usage_utilization{limit="5h_rolling"} > 70
+            for: 1m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Claude Code 5-hour limit at {{ $value | printf \"%.0f\" }}%"
+              description: "5-hour rolling usage is above 70%. Consider slowing down or switching to lighter models."
+
+          - alert: ClaudeCodeUsage5hCritical
+            expr: claude_code_usage_utilization{limit="5h_rolling"} > 85
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Claude Code 5-hour limit at {{ $value | printf \"%.0f\" }}%"
+              description: "5-hour rolling usage is above 85%. You may hit the limit soon. Switch to Haiku or wait for reset."
+
+          - alert: ClaudeCodeUsage5hExhausted
+            expr: claude_code_usage_utilization{limit="5h_rolling"} > 95
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Claude Code 5-hour limit nearly exhausted ({{ $value | printf \"%.0f\" }}%)"
+              description: "5-hour limit is nearly exhausted. You will be rate limited. Wait for reset or use API key."
+
+          - alert: ClaudeCodeUsage7dWarning
+            expr: claude_code_usage_utilization{limit="7d_all_models"} > 70
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Claude Code weekly limit at {{ $value | printf \"%.0f\" }}%"
+              description: "Weekly usage across all models is above 70%. Pace your usage for the rest of the week."
+
+          - alert: ClaudeCodeUsage7dCritical
+            expr: claude_code_usage_utilization{limit="7d_all_models"} > 85
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Claude Code weekly limit at {{ $value | printf \"%.0f\" }}%"
+              description: "Weekly usage is above 85%. Consider using API key for remaining work this week."
+
+          - alert: ClaudeCodeUsage7dSonnetWarning
+            expr: claude_code_usage_utilization{limit="7d_sonnet"} > 70
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Claude Code weekly Sonnet limit at {{ $value | printf \"%.0f\" }}%"
+              description: "Weekly Sonnet-specific usage is above 70%. Consider using Opus or Haiku instead."
+
+          - alert: ClaudeCodeHighBurnRate
+            expr: deriv(claude_code_usage_utilization{limit="5h_rolling"}[10m]) * 3600 > 20
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High Claude Code consumption rate: {{ $value | printf \"%.1f\" }}%/hour"
+              description: "You are consuming limits at {{ $value | printf \"%.1f\" }}% per hour. Consider slowing down or switching to lighter models."
+
+          - alert: ClaudeCodeLowCacheEfficiency
+            expr: >
+              (sum(claude_code_token_usage_tokens_total{type="cacheRead"})
+              / (sum(claude_code_token_usage_tokens_total{type="cacheRead"}) + sum(claude_code_token_usage_tokens_total{type="input"})))
+              < 0.5
+            for: 10m
+            labels:
+              severity: info
+            annotations:
+              summary: "Low cache efficiency: {{ $value | humanizePercentage }}"
+              description: "Cache hit ratio is below 50%. Try to keep sessions longer and avoid restarts to improve efficiency."
+
+          - alert: ClaudeCodeUsageExporterDown
+            expr: claude_code_usage_scrape_success == 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Claude Code usage exporter failing"
+              description: "The usage limits exporter is not able to fetch data from Anthropic API. Check credentials."
+
+          - alert: ClaudeCodeNoActivity
+            expr: increase(claude_code_api_requests_total[30m]) == 0
+            for: 30m
+            labels:
+              severity: info
+            annotations:
+              summary: "No Claude Code API activity in 30 minutes"
+              description: "No API requests detected in the last 30 minutes. This is informational only."
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: claudefana
+data:
+  datasources.yml: |
+    apiVersion: 1
+
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        uid: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+        editable: true
+
+      - name: Loki
+        type: loki
+        uid: loki
+        access: proxy
+        url: http://loki:3100
+        editable: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: claudefana
+data:
+  dashboards.yml: |
+    apiVersion: 1
+
+    providers:
+      - name: 'Claude Code'
+        orgId: 1
+        folder: 'Claude Code'
+        folderUid: 'claude-code'
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /etc/grafana/dashboards

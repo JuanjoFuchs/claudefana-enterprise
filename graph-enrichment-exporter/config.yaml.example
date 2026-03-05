@@ -1,0 +1,18 @@
+# Microsoft Entra ID (Azure AD) App Registration
+# Create one at https://portal.azure.com > App registrations
+# Required API permissions: User.Read.All (Application), Directory.Read.All (Application)
+azure:
+  tenant_id: "your-tenant-id"
+  client_id: "your-client-id"
+  client_secret: "your-client-secret"
+
+# Exporter settings
+exporter:
+  port: 9101
+  # How often to refresh user data from Graph API (seconds)
+  refresh_interval: 3600  # 1 hour
+  # Filter to only fetch users with these domains (optional)
+  # If empty, fetches all licensed users
+  email_domains:
+    - example.com
+    - subsidiary.com

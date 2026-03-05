@@ -1,0 +1,31 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/alerts/*.yml
+
+otlp:
+  promote_resource_attributes:
+    - service.name
+    - service.version
+
+scrape_configs:
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8889']
+    scrape_interval: 5s
+
+  - job_name: 'jira-tempo'
+    static_configs:
+      - targets: ['jira-tempo-exporter:9102']
+    scrape_interval: 60s
+
+  - job_name: 'graph-enrichment'
+    static_configs:
+      - targets: ['graph-enrichment:9101']
+    scrape_interval: 60s
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

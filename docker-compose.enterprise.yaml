@@ -1,0 +1,54 @@
+include:
+  - path: ../claudefana/docker-compose.otel.yaml
+
+services:
+  prometheus:
+    volumes:
+      - ./prometheus-enterprise.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    volumes:
+      - ./dashboards:/var/lib/grafana/dashboards:ro
+
+  jira-tempo-exporter:
+    build: ./jira-tempo-exporter
+    container_name: jira-tempo-exporter
+    ports:
+      - "9102:9102"
+    environment:
+      - JIRA_URL=${JIRA_URL}
+      - JIRA_API_TOKEN=${JIRA_API_TOKEN}
+      - EXPORTER_PORT=9102
+      - REFRESH_INTERVAL=300
+      - LOOKBACK_DAYS=30
+      - STORY_POINTS_FIELD=customfield_13303
+      - PROJECT_FILTER=${PROJECT_FILTER:-}
+      - PROMETHEUS_URL=http://prometheus:9090
+      - COLLECT_TEAMS=${COLLECT_TEAMS:-false}
+    networks:
+      - otel-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  graph-enrichment:
+    build: ./graph-enrichment-exporter
+    container_name: graph-enrichment
+    ports:
+      - "9101:9101"
+    environment:
+      - AZURE_TENANT_ID=${GRAPH_TENANT_ID}
+      - AZURE_CLIENT_ID=${GRAPH_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${GRAPH_CLIENT_SECRET}
+      - EXPORTER_PORT=9101
+      - REFRESH_INTERVAL=3600
+      - PROMETHEUS_URL=http://prometheus:9090
+    networks:
+      - otel-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+networks:
+  otel-network:
+    driver: bridge
