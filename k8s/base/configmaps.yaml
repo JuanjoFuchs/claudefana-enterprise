@@ -100,6 +100,16 @@ data:
             conditions:
               - 'attributes["event.name"] == "api_request"'
 
+          - name: claude_code_prompt_length_chars
+            description: "Distribution of prompt lengths in characters"
+            histogram:
+              value: Double(attributes["prompt_length"])
+              buckets: [20, 100, 500]
+            attributes:
+              - key: user.email
+            conditions:
+              - 'attributes["event.name"] == "user_prompt"'
+
     processors:
       batch:
         timeout: 5s
@@ -119,6 +129,17 @@ data:
       deltatocumulative:
         max_stale: 10m
         max_streams: 10000
+
+      transform/ticket_extraction:
+        error_mode: ignore
+        log_statements:
+          - context: log
+            conditions:
+              - 'attributes["event.name"] == "tool_result"'
+              - 'IsMatch(attributes["tool_name"], "Bash")'
+              - 'IsMatch(attributes["tool_parameters"], "git commit")'
+            statements:
+              - 'set(attributes["jira_ticket_key"], ExtractPatterns(attributes["tool_parameters"], "^.*?(?P<ticket>[A-Z]{2,10}-[0-9]+).*$")["ticket"])  where attributes["tool_parameters"] != nil'
 
     exporters:
       prometheus:
@@ -144,7 +165,7 @@ data:
       pipelines:
         logs:
           receivers: [otlp]
-          processors: [memory_limiter, resource, batch]
+          processors: [memory_limiter, resource, transform/ticket_extraction, batch]
           exporters: [otlphttp/loki, count, signaltometrics, debug]
 
         metrics:

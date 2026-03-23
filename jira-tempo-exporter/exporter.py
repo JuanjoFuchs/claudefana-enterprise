@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 from urllib.parse import quote
 
 import httpx
-from prometheus_client import Gauge, start_http_server
+from prometheus_client import Gauge, Histogram, start_http_server
 
 logging.basicConfig(
     level=logging.INFO,
@@ -64,6 +64,13 @@ TEMPO_TEAM_MEMBER = Gauge(
     "tempo_team_member_info",
     "Tempo team membership (value=1, labels carry team data)",
     ["user_email", "username", "team_name", "team_id"],
+)
+
+RESOLUTION_TIME = Histogram(
+    "jira_issue_resolution_time_hours",
+    "Time from issue creation to resolution in hours",
+    ["user_email", "project", "issue_type", "priority"],
+    buckets=[1, 2, 4, 8, 16, 24, 48, 72, 120, 168, 336, 720],
 )
 
 # Org-wide lightweight counts (1 API call each, no pagination)
@@ -235,7 +242,7 @@ def collect_resolved_issues(usernames=None):
         clauses.append(f"assignee IN ({user_list})")
 
     jql = quote(" AND ".join(clauses) + " ORDER BY resolved DESC")
-    fields = f"assignee,project,issuetype,priority,{STORY_POINTS_FIELD}"
+    fields = f"assignee,project,issuetype,priority,created,resolutiondate,{STORY_POINTS_FIELD}"
 
     start_at = 0
     max_results = 100
@@ -263,6 +270,7 @@ def collect_resolved_issues(usernames=None):
     # Clear old metrics
     ISSUES_RESOLVED._metrics.clear()
     STORY_POINTS_RESOLVED._metrics.clear()
+    RESOLUTION_TIME._metrics.clear()
 
     # Aggregate by user
     user_points = {}  # (email, project) → points
@@ -278,6 +286,24 @@ def collect_resolved_issues(usernames=None):
         project = (f.get("project") or {}).get("key", "unknown")
         issue_type = (f.get("issuetype") or {}).get("name", "unknown")
         priority = (f.get("priority") or {}).get("name", "unknown")
+
+        # Resolution time histogram
+        created_str = f.get("created")
+        resolved_str = f.get("resolutiondate")
+        if created_str and resolved_str:
+            try:
+                created_dt = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+                resolved_dt = datetime.fromisoformat(resolved_str.replace("Z", "+00:00"))
+                hours = (resolved_dt - created_dt).total_seconds() / 3600
+                if hours > 0:
+                    RESOLUTION_TIME.labels(
+                        user_email=email,
+                        project=project,
+                        issue_type=issue_type,
+                        priority=priority,
+                    ).observe(hours)
+            except (ValueError, TypeError):
+                pass
 
         ISSUES_RESOLVED.labels(
             user_email=email,

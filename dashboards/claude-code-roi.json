@@ -1,0 +1,807 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "\u2190 Adoption Dashboard",
+      "tooltip": "Back to main adoption dashboard",
+      "type": "link",
+      "url": "/d/claude-code-adoption/claude-code-adoption"
+    }
+  ],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "Q1: What's Our ROI Per Developer?",
+      "type": "row"
+    },
+    {
+      "type": "text",
+      "id": 20,
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 1 },
+      "options": {
+        "mode": "markdown",
+        "content": "**What does each unit of developer output cost in AI spend?** Three unit economics metrics: cost per commit is the baseline, cost per resolved Jira issue ties AI spend directly to business outcomes, and cost per line of code measures raw output efficiency. The bar gauge breaks down cost per commit by team — showing which teams get the most output per dollar of Claude Code investment."
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "currencyUSD",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 10 },
+            { "color": "red", "value": 50 }
+          ]}
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 4 },
+      "id": 1,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto", "textMode": "auto", "colorMode": "value", "graphMode": "none", "justifyMode": "auto"
+      },
+      "title": "Cost Per Commit",
+      "description": "Total API spend / total commits across selected users. Lower is better.",
+      "type": "stat",
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))) / sum(max_over_time(claude_code_commit_count_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
+        "legendFormat": "$/commit", "refId": "A"
+      }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "currencyUSD",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 50 },
+            { "color": "red", "value": 200 }
+          ]}
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 4 },
+      "id": 2,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto", "textMode": "auto", "colorMode": "value", "graphMode": "none", "justifyMode": "auto"
+      },
+      "title": "Cost Per Resolved Issue",
+      "description": "API spend per Jira issue resolved. Ties AI cost directly to business outcomes.",
+      "type": "stat",
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))) / sum(max_over_time(jira_issues_resolved_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
+        "legendFormat": "$/issue", "refId": "A"
+      }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "currencyUSD",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.5 },
+            { "color": "red", "value": 2 }
+          ]}
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 4 },
+      "id": 3,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto", "textMode": "auto", "colorMode": "value", "graphMode": "none", "justifyMode": "auto"
+      },
+      "title": "Cost Per Line of Code",
+      "description": "API spend per line of code added. Measures raw output efficiency.",
+      "type": "stat",
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))) / sum(max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
+        "legendFormat": "$/line", "refId": "A"
+      }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "currencyUSD",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 10 },
+            { "color": "orange", "value": 25 },
+            { "color": "red", "value": 50 }
+          ]}
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+      "id": 4,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0,
+        "namePlacement": "left"
+      },
+      "title": "Cost Per Commit by Team",
+      "description": "API spend per commit for each team. Shows which teams get the most output per dollar. Lower is better.",
+      "type": "bargauge",
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "expr": "topk(20, (sum by (rollup_name) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))) / (sum by (rollup_name) (max_over_time(claude_code_commit_count_total[$__range]) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))))",
+        "legendFormat": "{{rollup_name}}", "refId": "A",
+        "instant": true,
+        "format": "time_series"
+      }],
+      "transformations": []
+    },
+
+    {
+      "collapsed": true,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 },
+      "id": 101,
+      "title": "Q2: Does Experience Level Change Effectiveness?",
+      "type": "row",
+      "panels": [
+        {
+          "type": "text",
+          "id": 21,
+          "gridPos": { "h": 3, "w": 24, "x": 0, "y": 18 },
+          "options": {
+            "mode": "markdown",
+            "content": "**Do certain roles get more value from Claude Code than others?** Job title (from Microsoft Graph) serves as a proxy for seniority. **Top row:** Acceptance rate (lowest-first) highlights roles rejecting suggestions most, total cost shows where money goes, cost per commit reveals which roles produce the cheapest output. **Bottom row:** Average prompt length and short prompt ratio by role — roles writing short, low-effort prompts get worse results and are the highest-leverage coaching targets."
+          }
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "percentunit",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 0.5 },
+                { "color": "green", "value": 0.7 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 21 },
+          "id": 5,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Code Edit Acceptance Rate by Role",
+          "description": "Fraction of Claude's suggestions accepted per role. Sorted lowest-first to highlight roles needing training.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "bottomk(20,\n  (sum by (job_title) (max_over_time(claude_code_code_edit_tool_decision_total{decision=\"accept\"}[$__range]) * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\", job_title!=\"\"}[$__range])))))\n  /\n  (sum by (job_title) (max_over_time(claude_code_code_edit_tool_decision_total[$__range]) * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\", job_title!=\"\"}[$__range])))))\n)",
+            "legendFormat": "{{job_title}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "currencyUSD",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 50 },
+                { "color": "red", "value": 200 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 21 },
+          "id": 6,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Total Cost by Role",
+          "description": "Total API spend per role. Sorted highest-first to show where money goes.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  sum by (job_title) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\", job_title!=\"\"}[$__range]))))\n)",
+            "legendFormat": "{{job_title}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "currencyUSD",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 10 },
+                { "color": "red", "value": 50 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 21 },
+          "id": 13,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Cost Per Commit by Role",
+          "description": "API spend per commit for each role. Shows which seniority levels get the most output per dollar.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  (sum by (job_title) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\", job_title!=\"\"}[$__range])))))\n  /\n  (sum by (job_title) (max_over_time(claude_code_commit_count_total[$__range]) * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\", job_title!=\"\"}[$__range])))))\n)",
+            "legendFormat": "{{job_title}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 50 },
+                { "color": "green", "value": 150 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 29 },
+          "id": 15,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Avg Prompt Length by Role",
+          "description": "Average prompt length (characters) per role. Longer prompts generally produce better results. Roles with short avg may need prompting coaching.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  (sum by (job_title) (claude_code_prompt_length_chars_sum * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\", job_title!=\"\"}[$__range])))))\n  /\n  (sum by (job_title) (claude_code_prompt_length_chars_count * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\", job_title!=\"\"}[$__range])))))\n)",
+            "legendFormat": "{{job_title}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "percentunit",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 0.1 },
+                { "color": "red", "value": 0.25 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 29 },
+          "id": 27,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Short Prompt Ratio by Role",
+          "description": "Fraction of prompts under 20 characters per role. Higher = more low-effort prompting. These roles benefit most from coaching.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  (sum by (job_title) (claude_code_prompt_length_chars_bucket{le=\"20\"} * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\", job_title!=\"\"}[$__range])))))\n  /\n  (sum by (job_title) (claude_code_prompt_length_chars_count * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\", job_title!=\"\"}[$__range])))))\n)",
+            "legendFormat": "{{job_title}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        }
+      ]
+    },
+
+    {
+      "collapsed": true,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "id": 102,
+      "title": "Q3: Should We Switch Pricing Models?",
+      "type": "row",
+      "panels": [
+        {
+          "type": "text",
+          "id": 22,
+          "gridPos": { "h": 3, "w": 24, "x": 0, "y": 19 },
+          "options": {
+            "mode": "markdown",
+            "content": "**How many users fit each subscription tier?** Each user's actual API spend determines their optimal tier: **Pro** (<$20/mo), **Max 5x** ($20-100), **Max 20x** ($100-200), or **pay-as-you-go** (>$200). The stats show the headcount in each bucket. The bar gauge below breaks down average per-user cost by team — the color tells you which tier that team's average user needs."
+          }
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "fixed", "fixedColor": "green" },
+              "noValue": "0"
+            },
+            "overrides": [
+              { "matcher": {"id": "byName", "options": "Pro (<$20)"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Max 5x ($20-100)"}, "properties": [{"id": "color", "value": {"fixedColor": "yellow", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Max 20x ($100-200)"}, "properties": [{"id": "color", "value": {"fixedColor": "orange", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Pay-as-you-go (>$200)"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}] }
+            ]
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+          "id": 30,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 20, "minVizWidth": 0,
+            "namePlacement": "left"
+          },
+          "title": "Users Per Subscription Tier",
+          "description": "Number of users whose API spend falls in each subscription tier. Longer bar = more users in that tier.",
+          "type": "bargauge",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(\n  (sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n  < 20\n)",
+              "legendFormat": "Pro (<$20)", "refId": "A"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(\n  (sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n  >= 20\n  and\n  (sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n  < 100\n)",
+              "legendFormat": "Max 5x ($20-100)", "refId": "B"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(\n  (sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n  >= 100\n  and\n  (sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n  < 200\n)",
+              "legendFormat": "Max 20x ($100-200)", "refId": "C"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(\n  (sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left() topk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n  >= 200\n)",
+              "legendFormat": "Pay-as-you-go (>$200)", "refId": "D"
+            }
+          ]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "currencyUSD",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 20 },
+                { "color": "orange", "value": 100 },
+                { "color": "red", "value": 200 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+          "id": 7,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Avg Cost Per User by Team",
+          "description": "Average per-user cost within each team. Color = recommended tier: green = Pro, yellow = Max 5x, orange = Max 20x, red = exceeds all tiers.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  avg by (rollup_name) (sum by (user_email, rollup_name) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n)",
+            "legendFormat": "{{rollup_name}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        }
+      ]
+    },
+
+    {
+      "collapsed": true,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 },
+      "id": 103,
+      "title": "Q4: Where Are Teams Getting Stuck?",
+      "type": "row",
+      "panels": [
+        {
+          "type": "text",
+          "id": 23,
+          "gridPos": { "h": 3, "w": 24, "x": 0, "y": 20 },
+          "options": {
+            "mode": "markdown",
+            "content": "**High rejection rates and expensive sessions are friction signals.** Teams that reject Claude's suggestions frequently aren't getting value. Teams with high average session costs are running long, context-heavy sessions — often a sign of getting stuck. If the same team appears high on both charts, that's your highest-priority coaching target. The context growth chart below shows the raw pattern: steep curves = sessions where costs are accelerating."
+          }
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "percentunit",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 0.05 },
+                { "color": "red", "value": 0.15 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 23 },
+          "id": 8,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Rejection Rate by Team",
+          "description": "Fraction of Claude's code suggestions rejected per team. Teams at the top reject the most — they may need training or different workflows.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  1 - (\n    (sum by (rollup_name) (max_over_time(claude_code_code_edit_tool_decision_total{decision=\"accept\"}[$__range]) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n    /\n    (sum by (rollup_name) (max_over_time(claude_code_code_edit_tool_decision_total[$__range]) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n  )\n)",
+            "legendFormat": "{{rollup_name}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "currencyUSD",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 23 },
+          "id": 17,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Avg Cost Per Session by Team",
+          "description": "Average session cost per team. High values = long, expensive sessions — a friction signal. Teams at the top may benefit from shorter sessions.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  avg by (rollup_name) (\n    sum by (session_id, rollup_name) (\n      max_over_time(claude_code_cost_usage_USD_total[$__range])\n      * on(user_email) group_left(rollup_name)\n      topk by (user_email) (1, max by (user_email, rollup_name) (\n        max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])\n      ))\n    )\n  )\n)",
+            "legendFormat": "{{rollup_name}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "fixed", "fixedColor": "green" },
+              "noValue": "0"
+            },
+            "overrides": [
+              { "matcher": {"id": "byName", "options": "Small (<100K)"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Medium (100K-500K)"}, "properties": [{"id": "color", "value": {"fixedColor": "yellow", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Large (500K-1M)"}, "properties": [{"id": "color", "value": {"fixedColor": "orange", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Huge (>1M)"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}] }
+            ]
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 31 },
+          "id": 18,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 20, "minVizWidth": 0
+          },
+          "title": "Session Size Distribution",
+          "description": "Sessions bucketed by total context window size (cache read + creation tokens). Green = healthy short sessions, red = very large context windows.",
+          "type": "bargauge",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(\n  (sum by (session_id) (max_over_time(claude_code_token_usage_tokens_total{type=~\"cacheRead|cacheCreation\"}[$__range])))\n  < 100000\n) or vector(0)",
+              "legendFormat": "Small (<100K)", "refId": "A"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(\n  (sum by (session_id) (max_over_time(claude_code_token_usage_tokens_total{type=~\"cacheRead|cacheCreation\"}[$__range])))\n  >= 100000\n  and\n  (sum by (session_id) (max_over_time(claude_code_token_usage_tokens_total{type=~\"cacheRead|cacheCreation\"}[$__range])))\n  < 500000\n) or vector(0)",
+              "legendFormat": "Medium (100K-500K)", "refId": "B"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(\n  (sum by (session_id) (max_over_time(claude_code_token_usage_tokens_total{type=~\"cacheRead|cacheCreation\"}[$__range])))\n  >= 500000\n  and\n  (sum by (session_id) (max_over_time(claude_code_token_usage_tokens_total{type=~\"cacheRead|cacheCreation\"}[$__range])))\n  < 1000000\n) or vector(0)",
+              "legendFormat": "Large (500K-1M)", "refId": "C"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(\n  (sum by (session_id) (max_over_time(claude_code_token_usage_tokens_total{type=~\"cacheRead|cacheCreation\"}[$__range])))\n  >= 1000000\n) or vector(0)",
+              "legendFormat": "Huge (>1M)", "refId": "D"
+            }
+          ]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "percentunit",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 0.15 },
+                { "color": "red", "value": 0.3 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 31 },
+          "id": 28,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Large Session Rate by Team",
+          "description": "% of each team's sessions exceeding 500K context tokens. Teams at the top should start new sessions more frequently.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  (count by (rollup_name) (\n    (sum by (session_id, rollup_name) (\n      max_over_time(claude_code_token_usage_tokens_total{type=~\"cacheRead|cacheCreation\"}[$__range])\n      * on(user_email) group_left(rollup_name)\n      topk by (user_email) (1, max by (user_email, rollup_name) (\n        max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])\n      ))\n    ))\n    >= 500000\n  ))\n  /\n  (count by (rollup_name) (\n    sum by (session_id, rollup_name) (\n      max_over_time(claude_code_token_usage_tokens_total{type=~\"cacheRead|cacheCreation\"}[$__range])\n      * on(user_email) group_left(rollup_name)\n      topk by (user_email) (1, max by (user_email, rollup_name) (\n        max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])\n      ))\n    )\n  ))\n)",
+            "legendFormat": "{{rollup_name}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        }
+      ]
+    },
+
+    {
+      "collapsed": true,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 },
+      "id": 104,
+      "title": "Q5: Is Claude Code Making Us Faster at Fixing Bugs?",
+      "type": "row",
+      "panels": [
+        {
+          "type": "text",
+          "id": 24,
+          "gridPos": { "h": 3, "w": 24, "x": 0, "y": 21 },
+          "options": {
+            "mode": "markdown",
+            "content": "**Are tickets getting resolved faster with Claude Code?** Median resolution time by team shows which teams close issues quickest. Resolution by priority reveals whether high-severity bugs are being fixed fast. Cost per resolved issue by team ties AI spend directly to business outcomes — lower means more bug fixes per dollar. The distribution shows the org-wide resolution speed profile."
+          }
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "h",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 48 },
+                { "color": "red", "value": 168 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+          "id": 10,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Median Resolution Time by Team",
+          "description": "Median hours from Jira issue created to resolved, per team. Lower = faster.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  histogram_quantile(0.5,\n    sum by (le, rollup_name) (\n      jira_issue_resolution_time_hours_bucket\n      * on(user_email) group_left(rollup_name)\n      topk by (user_email) (1, max by (user_email, rollup_name) (\n        max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])\n      ))\n    )\n  )\n)",
+            "legendFormat": "{{rollup_name}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "h",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 48 },
+                { "color": "red", "value": 168 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
+          "id": 11,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Median Resolution Time by Priority",
+          "description": "Median hours to resolve by issue priority. Are critical bugs being fixed fast?",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(10,\n  histogram_quantile(0.5,\n    sum by (le, priority) (\n      jira_issue_resolution_time_hours_bucket\n    )\n  )\n)",
+            "legendFormat": "{{priority}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "unit": "currencyUSD",
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 50 },
+                { "color": "red", "value": 200 }
+              ]}
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+          "id": 12,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 16, "minVizWidth": 0
+          },
+          "title": "Cost Per Resolved Issue by Team",
+          "description": "API spend per Jira issue resolved, by team. Lower = more bug fixes per dollar of Claude Code investment.",
+          "type": "bargauge",
+          "targets": [{
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "topk(20,\n  (sum by (rollup_name) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n  /\n  (sum by (rollup_name) (max_over_time(jira_issues_resolved_total[$__range]) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))\n)",
+            "legendFormat": "{{rollup_name}}", "refId": "A",
+            "instant": true,
+            "format": "time_series"
+          }]
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "fixed", "fixedColor": "green" },
+              "noValue": "0"
+            },
+            "overrides": [
+              { "matcher": {"id": "byName", "options": "Fast (<1 day)"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Normal (1-3 days)"}, "properties": [{"id": "color", "value": {"fixedColor": "super-light-green", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Slow (3-7 days)"}, "properties": [{"id": "color", "value": {"fixedColor": "yellow", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Very Slow (1-2 weeks)"}, "properties": [{"id": "color", "value": {"fixedColor": "orange", "mode": "fixed"}}] },
+              { "matcher": {"id": "byName", "options": "Critical (>2 weeks)"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}] }
+            ]
+          },
+          "gridPos": { "h": 6, "w": 24, "x": 0, "y": 32 },
+          "id": 29,
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "minVizHeight": 20, "minVizWidth": 0
+          },
+          "title": "Resolution Time Distribution",
+          "description": "Issues bucketed by resolution speed. Green = fast, red = stuck for weeks.",
+          "type": "bargauge",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(jira_issue_resolution_time_hours_bucket{le=\"24\"}) or vector(0)",
+              "legendFormat": "Fast (<1 day)", "refId": "A"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "(sum(jira_issue_resolution_time_hours_bucket{le=\"72\"}) - sum(jira_issue_resolution_time_hours_bucket{le=\"24\"})) or vector(0)",
+              "legendFormat": "Normal (1-3 days)", "refId": "B"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "(sum(jira_issue_resolution_time_hours_bucket{le=\"168\"}) - sum(jira_issue_resolution_time_hours_bucket{le=\"72\"})) or vector(0)",
+              "legendFormat": "Slow (3-7 days)", "refId": "C"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "(sum(jira_issue_resolution_time_hours_bucket{le=\"336\"}) - sum(jira_issue_resolution_time_hours_bucket{le=\"168\"})) or vector(0)",
+              "legendFormat": "Very Slow (1-2 weeks)", "refId": "D"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "(sum(jira_issue_resolution_time_hours_bucket{le=\"+Inf\"}) - sum(jira_issue_resolution_time_hours_bucket{le=\"336\"})) or vector(0)",
+              "legendFormat": "Critical (>2 weeks)", "refId": "E"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["claude-code", "roi"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "definition": "label_values(user_info, rollup_name)",
+        "hide": 0, "includeAll": true, "allValue": ".*",
+        "label": "Rollup Manager", "multi": true, "name": "rollup_name",
+        "query": "label_values(user_info, rollup_name)", "refresh": 1, "sort": 1, "type": "query"
+      },
+      {
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "definition": "label_values(user_info{rollup_name=~\"$rollup_name\"}, manager_name)",
+        "hide": 0, "includeAll": true, "allValue": ".*",
+        "label": "Manager", "multi": true, "name": "manager_name",
+        "query": "label_values(user_info{rollup_name=~\"$rollup_name\"}, manager_name)", "refresh": 1, "sort": 1, "type": "query"
+      },
+      {
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "definition": "label_values(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\"}, user_email)",
+        "hide": 0, "includeAll": true, "allValue": ".*",
+        "label": "User", "multi": true, "name": "user_email",
+        "query": "label_values(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\"}, user_email)", "refresh": 1, "sort": 1, "type": "query"
+      },
+      {
+        "current": { "selected": true, "text": "50", "value": "50" },
+        "description": "Number of developers in your engineering team",
+        "hide": 0, "label": "Developer Headcount", "name": "developer_headcount",
+        "options": [
+          { "selected": false, "text": "10", "value": "10" },
+          { "selected": false, "text": "25", "value": "25" },
+          { "selected": true, "text": "50", "value": "50" },
+          { "selected": false, "text": "75", "value": "75" },
+          { "selected": false, "text": "100", "value": "100" },
+          { "selected": false, "text": "150", "value": "150" },
+          { "selected": false, "text": "200", "value": "200" },
+          { "selected": false, "text": "300", "value": "300" },
+          { "selected": false, "text": "500", "value": "500" }
+        ],
+        "query": "10,25,50,75,100,150,200,300,500", "type": "custom"
+      }
+    ]
+  },
+  "time": { "from": "now-7d", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Claude Code ROI Analysis",
+  "uid": "claude-code-roi",
+  "version": 1
+}

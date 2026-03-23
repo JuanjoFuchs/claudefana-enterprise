@@ -58,7 +58,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "user_info{user_email=~\"$user_email\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\"}",
+          "expr": "max_over_time(user_info{user_email=~\"$user_email\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\"}[$__range])",
           "format": "table",
           "instant": true,
           "refId": "A"

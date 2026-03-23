@@ -18,6 +18,18 @@
       "tooltip": "Drill into individual user timeline",
       "type": "link",
       "url": "/d/claude-code-user-explorer/user-explorer"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "ROI Analysis \u2192",
+      "tooltip": "Analyze ROI, pricing, session efficiency, and prompt quality",
+      "type": "link",
+      "url": "/d/claude-code-roi/claude-code-roi-analysis"
     }
   ],
   "panels": [
@@ -100,7 +112,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count(count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))) / $developer_headcount * 100",
+          "expr": "count(count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))) / $developer_headcount * 100",
           "legendFormat": "Adoption %",
           "refId": "A"
         }
@@ -166,7 +178,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count(count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})))",
+          "expr": "count(count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
           "legendFormat": "Users",
           "refId": "A"
         }
@@ -290,7 +302,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(max_over_time(claude_code_commit_count_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+          "expr": "sum(max_over_time(claude_code_commit_count_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
           "legendFormat": "Commits",
           "refId": "A"
         }
@@ -348,7 +360,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count(count by (session_id) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})))",
+          "expr": "count(count by (session_id) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
           "legendFormat": "Sessions",
           "refId": "A"
         }
@@ -406,7 +418,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count(count by (session_id) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))) / count(count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})))",
+          "expr": "count(count by (session_id) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))) / count(count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
           "legendFormat": "Sessions/User",
           "refId": "A"
         }
@@ -472,7 +484,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+          "expr": "sum(max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
           "legendFormat": "Lines",
           "refId": "A"
         }
@@ -541,7 +553,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(max_over_time(claude_code_code_edit_tool_decision_total{decision=\"accept\"}[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})) / sum(max_over_time(claude_code_code_edit_tool_decision_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})) * 100",
+          "expr": "sum(max_over_time(claude_code_code_edit_tool_decision_total{decision=\"accept\"}[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))) / sum(max_over_time(claude_code_code_edit_tool_decision_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))) * 100",
           "legendFormat": "Acceptance %",
           "refId": "A"
         }
@@ -600,7 +612,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count by (service_version) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+          "expr": "count by (service_version) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
           "legendFormat": "v{{service_version}}",
           "refId": "A"
         }
@@ -659,7 +671,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count by (os_type) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+          "expr": "count by (os_type) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
           "legendFormat": "{{os_type}}",
           "refId": "A"
         }
@@ -712,7 +724,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count(count by (user_email) (increase(claude_code_active_time_seconds_total[$__rate_interval]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})))",
+          "expr": "count(count by (user_email) (increase(claude_code_active_time_seconds_total[$__rate_interval]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
           "legendFormat": "Active Users",
           "refId": "A"
         },
@@ -721,7 +733,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count(count by (user_email) (increase(claude_code_active_time_seconds_total[$__rate_interval]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})) and count by (user_email) (increase(claude_code_active_time_seconds_total[$__rate_interval] offset 7d) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})))",
+          "expr": "count(count by (user_email) (increase(claude_code_active_time_seconds_total[$__rate_interval]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))) and count by (user_email) (increase(claude_code_active_time_seconds_total[$__range] offset $__rate_interval) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
           "legendFormat": "Returning Users",
           "refId": "B"
         },
@@ -730,7 +742,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count(count by (user_email) (increase(claude_code_active_time_seconds_total[$__rate_interval]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})) unless count by (user_email) (increase(claude_code_active_time_seconds_total[$__rate_interval] offset 7d) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})))",
+          "expr": "count(count by (user_email) (increase(claude_code_active_time_seconds_total[$__rate_interval]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))) unless count by (user_email) (increase(claude_code_active_time_seconds_total[$__range] offset $__rate_interval) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
           "legendFormat": "New Users",
           "refId": "C"
         }
@@ -820,7 +832,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (type) (rate(claude_code_lines_of_code_count_total[$__rate_interval]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+          "expr": "sum by (type) (rate(claude_code_lines_of_code_count_total[$__rate_interval]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
           "legendFormat": "{{type}}",
           "refId": "A"
         }
@@ -890,7 +902,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10,\n  sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\n  * on(user_email) group_left(display_name)\n  topk by (user_email) (1, max by (user_email, display_name) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))\n)",
+          "expr": "topk(10,\n  sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\n  * on(user_email) group_left(display_name)\n  topk by (user_email) (1, max by (user_email, display_name) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))\n)",
           "legendFormat": "{{display_name}}",
           "refId": "A",
           "instant": true,
@@ -963,7 +975,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sort_desc(sum by (job_title) (\n  sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\n  * on(user_email) group_left(job_title)\n  topk by (user_email) (1, max by (user_email, job_title) (user_info{job_title!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))\n))",
+          "expr": "sort_desc(sum by (job_title) (\n  sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\n  * on(user_email) group_left(job_title)\n  topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{job_title!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))\n))",
           "legendFormat": "{{job_title}}",
           "refId": "A",
           "instant": true,
@@ -1045,7 +1057,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+          "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
           "legendFormat": "Total",
           "refId": "A"
         }
@@ -1112,7 +1124,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})) / count(count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})))",
+          "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))) / count(count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
           "legendFormat": "Avg",
           "refId": "A"
         }
@@ -1171,7 +1183,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})) / count(count by (session_id) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})))",
+          "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))) / count(count by (session_id) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))",
           "legendFormat": "Avg",
           "refId": "A"
         }
@@ -1238,7 +1250,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})) / sum(max_over_time(claude_code_commit_count_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+          "expr": "sum(max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))) / sum(max_over_time(claude_code_commit_count_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
           "legendFormat": "$/commit",
           "refId": "A"
         }
@@ -1294,7 +1306,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sort_desc(sum by (tool_name) (max_over_time(claude_code_tool_calls_total[$__range]) and on(session_id) max by (session_id) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))))",
+          "expr": "sort_desc(sum by (tool_name) (max_over_time(claude_code_tool_calls_total[$__range]) and on(session_id) max by (session_id) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))",
           "legendFormat": "{{tool_name}}",
           "refId": "A",
           "format": "table",
@@ -1368,7 +1380,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (model) (rate(claude_code_cost_usage_USD_total[$__rate_interval]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+          "expr": "sum by (model) (rate(claude_code_cost_usage_USD_total[$__rate_interval]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
           "legendFormat": "{{model}}",
           "refId": "A"
         }
@@ -1428,7 +1440,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (model) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+          "expr": "sum by (model) (max_over_time(claude_code_cost_usage_USD_total[$__range]) and on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
           "legendFormat": "{{model}}",
           "refId": "A"
         }
@@ -1507,7 +1519,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (department) (\n  sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\n  * on(user_email) group_left(department)\n  topk by (user_email) (1, max by (user_email, department) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))\n)",
+              "expr": "sum by (department) (\n  sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\n  * on(user_email) group_left(department)\n  topk by (user_email) (1, max by (user_email, department) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))\n)",
               "legendFormat": "{{department}}",
               "refId": "A"
             }
@@ -1573,7 +1585,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "count by (department) (\n  group by (user_email, department) (\n    max_over_time(claude_code_cost_usage_USD_total[$__range])\n    * on(user_email) group_left(department)\n    topk by (user_email) (1, max by (user_email, department) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))\n  )\n)",
+              "expr": "count by (department) (\n  group by (user_email, department) (\n    max_over_time(claude_code_cost_usage_USD_total[$__range])\n    * on(user_email) group_left(department)\n    topk by (user_email) (1, max by (user_email, department) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))\n  )\n)",
               "legendFormat": "{{department}}",
               "refId": "A"
             }
@@ -1636,7 +1648,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sort_desc(count by (rollup_name) (group by (user_email, rollup_name) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (user_info{rollup_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})))))",
+              "expr": "sort_desc(count by (rollup_name) (group by (user_email, rollup_name) (max_over_time(claude_code_cost_usage_USD_total[$__range]) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (max_over_time(user_info{rollup_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))))))",
               "legendFormat": "{{rollup_name}}",
               "refId": "A",
               "format": "table",
@@ -1702,7 +1714,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sort_desc(sum by (rollup_name) (sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range])) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (user_info{rollup_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))))",
+              "expr": "sort_desc(sum by (rollup_name) (sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range])) * on(user_email) group_left(rollup_name) topk by (user_email) (1, max by (user_email, rollup_name) (max_over_time(user_info{rollup_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))",
               "legendFormat": "{{rollup_name}}",
               "refId": "A",
               "format": "table",
@@ -1774,7 +1786,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sort_desc(sum by (job_title) (sum by (user_email) (max_over_time(claude_code_active_time_seconds_total[$__range])) * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (user_info{job_title!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))))",
+              "expr": "sort_desc(sum by (job_title) (sum by (user_email) (max_over_time(claude_code_active_time_seconds_total[$__range])) * on(user_email) group_left(job_title) topk by (user_email) (1, max by (user_email, job_title) (max_over_time(user_info{job_title!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))))",
               "legendFormat": "{{job_title}}",
               "refId": "A",
               "format": "table",
@@ -1991,7 +2003,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\n* on(user_email) group_left(display_name, department, job_title, manager_name, rollup_name)\ntopk by (user_email) (1, max by (user_email, display_name, department, job_title, manager_name, rollup_name) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+              "expr": "sum by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\n* on(user_email) group_left(display_name, department, job_title, manager_name, rollup_name)\ntopk by (user_email) (1, max by (user_email, display_name, department, job_title, manager_name, rollup_name) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
               "format": "table",
               "instant": true,
               "legendFormat": "__auto",
@@ -2002,7 +2014,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (user_email) (max_over_time(claude_code_active_time_seconds_total[$__range]))\n* on(user_email) group_left()\ntopk by (user_email) (1, max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))",
+              "expr": "sum by (user_email) (max_over_time(claude_code_active_time_seconds_total[$__range]))\n* on(user_email) group_left()\ntopk by (user_email) (1, max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))",
               "format": "table",
               "instant": true,
               "legendFormat": "__auto",
@@ -2013,7 +2025,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (user_email) (max_over_time(claude_code_commit_count_total[$__range])) and on(user_email) count by (user_email) (user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})",
+              "expr": "sum by (user_email) (max_over_time(claude_code_commit_count_total[$__range])) and on(user_email) count by (user_email) (max_over_time(user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))",
               "format": "table",
               "instant": true,
               "legendFormat": "__auto",
@@ -2024,7 +2036,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (user_email) (max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range])) and on(user_email) count by (user_email) (user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})",
+              "expr": "sum by (user_email) (max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range])) and on(user_email) count by (user_email) (max_over_time(user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))",
               "format": "table",
               "instant": true,
               "legendFormat": "__auto",
@@ -2035,7 +2047,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (user_email) (max_over_time(jira_issues_resolved_total[$__range])) and on(user_email) count by (user_email) (user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})",
+              "expr": "sum by (user_email) (max_over_time(jira_issues_resolved_total[$__range])) and on(user_email) count by (user_email) (max_over_time(user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))",
               "format": "table",
               "instant": true,
               "legendFormat": "__auto",
@@ -2046,7 +2058,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (user_email) (max_over_time(jira_story_points_resolved_total[$__range])) and on(user_email) count by (user_email) (user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})",
+              "expr": "sum by (user_email) (max_over_time(jira_story_points_resolved_total[$__range])) and on(user_email) count by (user_email) (max_over_time(user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))",
               "format": "table",
               "instant": true,
               "legendFormat": "__auto",
@@ -2057,7 +2069,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (user_email) (tempo_time_logged_by_user_seconds) / 3600 and on(user_email) count by (user_email) (user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})",
+              "expr": "sum by (user_email) (tempo_time_logged_by_user_seconds) / 3600 and on(user_email) count by (user_email) (max_over_time(user_info{display_name!=\"\", rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))",
               "format": "table",
               "instant": true,
               "legendFormat": "__auto",
@@ -2068,7 +2080,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "(\n  sum by (user_email) (max_over_time(claude_code_active_time_seconds_total[$__range]))\n  / sum by (user_email) (tempo_time_logged_by_user_seconds)\n  * 100\n) and on(user_email) count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\nand on(user_email) max by (user_email) (user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})",
+              "expr": "(\n  sum by (user_email) (max_over_time(claude_code_active_time_seconds_total[$__range]))\n  / sum by (user_email) (tempo_time_logged_by_user_seconds)\n  * 100\n) and on(user_email) count by (user_email) (max_over_time(claude_code_cost_usage_USD_total[$__range]))\nand on(user_email) max by (user_email) (max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))",
               "format": "table",
               "instant": true,
               "legendFormat": "__auto",
@@ -2310,7 +2322,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(claude_code_cost_usage_USD_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(claude_code_cost_usage_USD_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(claude_code_cost_usage_USD_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
+              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(claude_code_cost_usage_USD_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(claude_code_cost_usage_USD_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(claude_code_cost_usage_USD_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
               "format": "table",
               "instant": true,
               "refId": "Cost"
@@ -2320,7 +2332,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(claude_code_active_time_seconds_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(claude_code_active_time_seconds_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(claude_code_active_time_seconds_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
+              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(claude_code_active_time_seconds_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(claude_code_active_time_seconds_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(claude_code_active_time_seconds_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
               "format": "table",
               "instant": true,
               "refId": "Active Time"
@@ -2330,7 +2342,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(claude_code_commit_count_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(claude_code_commit_count_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(claude_code_commit_count_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
+              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(claude_code_commit_count_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(claude_code_commit_count_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(claude_code_commit_count_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
               "format": "table",
               "instant": true,
               "refId": "Commits"
@@ -2340,7 +2352,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
+              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(claude_code_lines_of_code_count_total{type=\"added\"}[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
               "format": "table",
               "instant": true,
               "refId": "Lines Added"
@@ -2350,7 +2362,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(jira_issues_resolved_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(jira_issues_resolved_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(jira_issues_resolved_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
+              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(jira_issues_resolved_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(jira_issues_resolved_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(jira_issues_resolved_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
               "format": "table",
               "instant": true,
               "refId": "Issues Resolved"
@@ -2360,7 +2372,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(jira_story_points_resolved_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(jira_story_points_resolved_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(jira_story_points_resolved_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
+              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(max_over_time(jira_story_points_resolved_total[$__range])) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(max_over_time(jira_story_points_resolved_total[$__range])) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))), \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(max_over_time(jira_story_points_resolved_total[$__range])) * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
               "format": "table",
               "instant": true,
               "refId": "Story Points"
@@ -2370,7 +2382,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(tempo_time_logged_by_user_seconds) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))) / 3600, \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(tempo_time_logged_by_user_seconds) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}))) / 3600, \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(tempo_time_logged_by_user_seconds) / 3600 * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"})), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
+              "expr": "sum by (node_id)(label_replace(sum by (rollup_email)(sum by (user_email)(tempo_time_logged_by_user_seconds) * on(user_email) group_left(rollup_email) topk by (user_email)(1, max by (user_email, rollup_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))) / 3600, \"node_id\", \"$1\", \"rollup_email\", \"(.*)\"))\nor\nsum by (node_id)(label_replace(sum by (manager_email)(sum by (user_email)(tempo_time_logged_by_user_seconds) * on(user_email) group_left(manager_email) topk by (user_email)(1, max by (user_email, manager_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range])))) / 3600, \"node_id\", \"$1\", \"manager_email\", \"(.*)\") * on(node_id) group_left() max by (node_id)(org_tree_node))\nor\nsum by (node_id)(label_replace(sum by (user_email)(tempo_time_logged_by_user_seconds) / 3600 * on(user_email) group_left() topk by (user_email)(1, max by (user_email)(max_over_time(user_info{rollup_name=~\"$rollup_name\", manager_name=~\"$manager_name\", user_email=~\"$user_email\"}[$__range]))), \"node_id\", \"$1\", \"user_email\", \"(.*)\"))",
               "format": "table",
               "instant": true,
               "refId": "Tempo Hours"
@@ -2476,8 +2488,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "count(max_over_time(claude_code_session_count_total{user_email=~\"$user_email\"}[$__interval]))",
-              "interval": "30m",
+              "expr": "count(max_over_time(claude_code_session_count_total{user_email=~\"$user_email\"}[$__rate_interval]))",
               "legendFormat": "Sessions",
               "refId": "A"
             }
@@ -2591,8 +2602,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(increase(claude_code_cost_usage_USD_total{user_email=~\"$user_email\"}[$__interval]))\n/\ncount(max_over_time(claude_code_session_count_total{user_email=~\"$user_email\"}[$__interval]))",
-              "interval": "30m",
+              "expr": "sum(increase(claude_code_cost_usage_USD_total{user_email=~\"$user_email\"}[$__rate_interval]))\n/\ncount(max_over_time(claude_code_session_count_total{user_email=~\"$user_email\"}[$__rate_interval]))",
               "legendFormat": "$/session",
               "refId": "A"
             }
@@ -2706,8 +2716,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(\n  increase(claude_code_user_prompts_total[$__interval])\n  and on(session_id)\n  max_over_time(claude_code_session_count_total{user_email=~\"$user_email\"}[$__interval])\n)",
-              "interval": "30m",
+              "expr": "sum(\n  increase(claude_code_user_prompts_total[$__rate_interval])\n  and on(session_id)\n  max_over_time(claude_code_session_count_total{user_email=~\"$user_email\"}[$__rate_interval])\n)",
               "legendFormat": "Prompts",
               "refId": "A"
             }

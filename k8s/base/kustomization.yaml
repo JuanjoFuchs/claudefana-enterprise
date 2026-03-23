@@ -18,3 +18,4 @@ configMapGenerator:
     files:
       - ../../dashboards/claude-code-dashboard.json
       - ../../dashboards/claude-code-user-explorer.json
+      - ../../dashboards/claude-code-roi.json
